@@ -1,3 +1,6 @@
+
+![image](https://github.com/Matii178/Sensors_Libraries/assets/62108776/e221179e-9432-43fe-91ec-fd9187a481f1)
+
 AM2320 STM32 Library.
 Equipment used: STM32f103RB dev board, 2x 4.7k Ohm resistors, AM2320 sensor.
 
