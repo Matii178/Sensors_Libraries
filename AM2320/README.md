@@ -6,29 +6,29 @@ coming soon
 
 AM2320 Class description:
 
-AM2320_ADRESS            slave adress of sensor equal to 0xB8
+AM2320_ADRESS                   slave adress of sensor equal to 0xB8
 
-float humidity
-float temperature;
-uint16_t model;
-uint8_t versionNum;
-uint8_t data[8];
-I2C_HandleTypeDef *I2Cinstance;
+float humidity                  value of humidity
+float temperature;              value of temperature
+uint16_t model;                 model
+uint8_t versionNum;             number of version
+uint8_t data[8];                buffer to hold read data
+I2C_HandleTypeDef *I2Cinstance; I2C instance
 
-void AM2320_readTemperature(AM2320* const me);
-void AM2320_readHumidity(AM2320* const me);
-void AM2320_readTempAndHum(AM2320* const me);
-uint8_t AM2320_read(AM2320* const me, uint8_t startAdress, uint8_t bytes);
+void AM2320_readTemperature(AM2320* const me);  function to read temperature value and store its value inside 'float temperature'
+void AM2320_readHumidity(AM2320* const me);     function to read humidity value and store its value inside 'float humidity'
+void AM2320_readTempAndHum(AM2320* const me);   function to read both humidity and temperature and store them in 'float humidity' and 'float temperature'
+uint8_t AM2320_read(AM2320* const me, uint8_t startAdress, uint8_t bytes);  subfunction used to read 'uint8_t bytes' starting from adress value: 'uint8_t startAdress'
 
-float AM2320_getTemperature(AM2320* const me);
-float AM2320_getHumidity(AM2320* const me);
-uint16_t AM2320_getModel(AM2320* const me);
-uint8_t AM2320_getVersion(AM2320* const me);
+float AM2320_getTemperature(AM2320* const me); returns value stored in 'float temperature'
+float AM2320_getHumidity(AM2320* const me); returns value stored in 'float humidity'
+uint16_t AM2320_getModel(AM2320* const me); returns value stored in 'uint16_t model'
+uint8_t AM2320_getVersion(AM2320* const me); returns value stored in 'uint8_t versionNum'
 
 
-void AM2320_Init(AM2320* const me, I2C_HandleTypeDef * I2Cinstance);
-AM2320 * AM2320_Create(I2C_HandleTypeDef* hi2c);
-void AM2320_Destroy(AM2320* const me);
+void AM2320_Init(AM2320* const me, I2C_HandleTypeDef * I2Cinstance);  initialization of an object
+AM2320 * AM2320_Create(I2C_HandleTypeDef* hi2c);    creation of an object
+void AM2320_Destroy(AM2320* const me);              destruction of an object
 
 
 
