@@ -1,4 +1,4 @@
-<a href="[URL_REDIRECT](https://www.google.com/url?sa=i&url=https%3A%2F%2Fnettigo.pl%2Fproducts%2Fasair-am2320-i2c-czujnik-wilgotnosci-i-temperatury&psig=AOvVaw19xvh4Hrnz1tuXnLf-Bd67&ust=1698179311031000&source=images&cd=vfe&opi=89978449&ved=0CBEQjRxqFwoTCLibwoWBjYIDFQAAAAAdAAAAABAF)" target="blank"><img align="center" src="URL_TO_YOUR_IMAGE" height="50" /></a>
+<a href="[URL_REDIRECT](https://www.google.com/url?sa=i&url=https%3A%2F%2Fnettigo.pl%2Fproducts%2Fasair-am2320-i2c-czujnik-wilgotnosci-i-temperatury&psig=AOvVaw19xvh4Hrnz1tuXnLf-Bd67&ust=1698179311031000&source=images&cd=vfe&opi=89978449&ved=0CBEQjRxqFwoTCLibwoWBjYIDFQAAAAAdAAAAABAF)" target="blank"><img align="center" src="[URL_TO_YOUR_IMAGE](https://www.google.com/url?sa=i&url=https%3A%2F%2Fnettigo.pl%2Fproducts%2Fasair-am2320-i2c-czujnik-wilgotnosci-i-temperatury&psig=AOvVaw19xvh4Hrnz1tuXnLf-Bd67&ust=1698179311031000&source=images&cd=vfe&opi=89978449&ved=0CBEQjRxqFwoTCLibwoWBjYIDFQAAAAAdAAAAABAF)" height="100" /></a>
 
 AM2320 STM32 Library.
 Equipment used: STM32f103RB dev board, 2x 4.7k Ohm resistors, AM2320 sensor.
