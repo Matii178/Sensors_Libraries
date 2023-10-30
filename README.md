@@ -7,4 +7,4 @@ The aim of this repository is to create as many sensors' libraries as it is necc
 
 **Currently focusing on:**
 * ADXL345 *SPI*
-* BMP280 / HW-611 *I2C*
+* BMP280 *I2C*
