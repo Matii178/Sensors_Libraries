@@ -80,17 +80,50 @@ void BMP280_ReadRegisters(BMP280* const me, uint8_t address, uint8_t bytes) {
 	ret[0] = 0;
 }
 
-void BMP280_WriteRegisters(BMP280 * const me, uint8_t address, uint8_t data); //pointer to table?
-void BMP280_setConfigReg(BMP280 * const me);
-void BMP280_setCtrlMeasReg(BMP280 * const me);
-float BMP280_getTemperature(BMP280 * const me);
-float BMP280_getPressure(BMP280 * const me);
-uint8_t BMP280_getSensorID(BMP280 * const me);
-uint8_t BMP280_getConfigReg(BMP280 * const me) {
-	return 1;
-}
-uint8_t BMP280_getCtrlMeasReg(BMP280 * const me){
-	return 1;
+void BMP280_WriteRegisters(BMP280 * const me, uint8_t* addresses, uint8_t*  data, uint8_t bytes) {
+	//2 bytes of data => 4 bytes overall (2data+2add)
+
+	uint8_t dataToWrite[bytes*2]; // add + data
+
+	int counter = 0;
+	for (int i = 0; i < bytes * 2; i+=2) {
+		dataToWrite[i] = *(addresses + counter);
+		dataToWrite[i+1] = *(data + counter);
+		counter++;
+	}
+	//creating a table that contains addresses interspersed with data [add,data,add2,data2...]
+	HAL_I2C_Master_Transmit(me->i2c_handler, me->slaveAddress, dataToWrite, bytes*2, HAL_MAX_DELAY);
 }
 
-void BMP280_ResetSensor(BMP280 * const me);
+void BMP280_setConfigReg(BMP280 * const me, uint8_t reg) {
+	uint8_t add = 0xF5;
+	if(reg & 1 == 1) Error_Handler(); // otherwise SPI would turn on
+	BMP280_WriteRegisters(me, &add, reg, 1);
+	me->configReg = reg;
+}
+void BMP280_setCtrlMeasReg(BMP280 * const me, uint8_t reg){
+	uint8_t add = 0xF4; //CHECK THIS ONE
+	BMP280_WriteRegisters(me, &add, reg, 1);
+	me->ctrlMeasReg = reg;
+}
+float BMP280_getTemperature(BMP280 * const me){
+	return 1;
+}
+float BMP280_getPressure(BMP280 * const me) {
+	return 1;
+}
+uint8_t BMP280_getSensorID(BMP280 * const me){
+	return me->id;
+}
+uint8_t BMP280_getConfigReg(BMP280 * const me) {
+	return me->configReg;
+}
+uint8_t BMP280_getCtrlMeasReg(BMP280 * const me){
+	return me->ctrlMeasReg;
+}
+
+void BMP280_ResetSensor(BMP280 * const me){
+	uint8_t add = 0xE0;
+	uint8_t reg = 0xB6;
+	BMP280_WriteRegisters(me, &add, &reg, 1);
+}
