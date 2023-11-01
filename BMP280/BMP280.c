@@ -1,7 +1,12 @@
 #include "BMP280.h"
 
 /*
- * Creation of an object
+ * @brief Creation of BMP280 object
+ *
+ * @param i2c handler
+ * @param SDO_state -> SDO_STATE_GND when hardware pin connected to GND, SDO_STATE_VDD when connected to Vdd
+ *
+ * @retval pointer to BMP280 object
  */
 BMP280* BMP280_Create(I2C_HandleTypeDef *i2c_handler, uint8_t SDO_state) {
 	BMP280 *newObject = malloc(sizeof(BMP280));
@@ -14,12 +19,26 @@ BMP280* BMP280_Create(I2C_HandleTypeDef *i2c_handler, uint8_t SDO_state) {
  * Destruction of an object
  */
 }
-void BMP280_Destroy( BMP280* const me) {
+
+/*
+ * @brief Destruction of BMP280 object
+ *
+ * @param pointer to the object that will be utilized
+ *
+ * @retval nothing
+ */
+void BMP280_Destroy(BMP280* const me) {
 	free(me);
 }
 
 /*
- * First initialization of parameters
+ * @brief First initialization of sensor, is automatically used when object is created
+ *
+ * @param pointer to BMP280 object
+ * @param i2c handler
+ * @param sdo hardware connection
+ *
+ * @retval nothing
  */
 void BMP280_Init(BMP280* const me,I2C_HandleTypeDef* i2c_handler, uint8_t SDO_state){
 	memset(me->buffer,0,20);
@@ -49,9 +68,17 @@ void BMP280_Init(BMP280* const me,I2C_HandleTypeDef* i2c_handler, uint8_t SDO_st
 }
 
 /*
- * Initialization of sensor with given settings
+ * @brief First initialization of sensor with given parameters, should be used after creation of an object.
+ *
+ * @param pointer to BMP280 object
+ * @param mode in which will be the sensor working MODE_SLEEP / MODE_FORCED / MODE_NORMAL
+ * @param 3 bits to choose corresponding to standby time between every measurement: STB_0_5 ... STB_4000, number in ms
+ * @param 2 bits value that corresponds to oversampling settings of temperature
+ * @param same as earlier but with pressure
+ *
+ * @retval nothing
  */
-void BMP280_SensorInitialize(BMP280 * const me, uint8_t mode, uint16_t standbyTime, uint16_t osrs_t, uint16_t osrs_p) {
+void BMP280_SensorInitialize(BMP280 * const me, uint8_t mode, uint8_t standbyTime, uint8_t osrs_t, uint8_t osrs_p) {
 
 	uint8_t settings[2] = {0};
 	settings[0] = (osrs_t << 5) | (osrs_p << 2) | mode;
@@ -64,13 +91,16 @@ void BMP280_SensorInitialize(BMP280 * const me, uint8_t mode, uint16_t standbyTi
 	me->configReg = settings[1];
 
 }
+
+/*
+ * @brief function used to read temperature value
+ *
+ * @param pointer to BMP280 objec
+ *
+ * @retval nothing
+ */
 void BMP280_ReadTemperature(BMP280 * const me) {
 
-	//w zaleznosci od parametrow wewnetrznych...
-	//BMP280_ReadRegisters(me, 0xFA, 3..2..1);
-
-	// Returns temperature in DegC, resolution is 0.01 DegC. Output value of “5123” equals 51.23 DegC.
-	// t_fine carries fine temperature as global value
 	int32_t adc_T = 0;
 	double var1, var2, T;
 
@@ -89,6 +119,14 @@ void BMP280_ReadTemperature(BMP280 * const me) {
 
 }
 
+/*
+ * @brief function used to read temperature and pressure
+ *
+ * @param pointer to BMP280 object
+ * @param altitude of place in meters above mean sea level -> needed to calculate (not local) air pressure value
+ *
+ * @retval nothing
+ */
 void BMP280_ReadTemperatureAndPressure( BMP280 * const me, uint16_t altitude){
 	long signed int adc_T = 0;
 	long signed int adc_P = 0;
@@ -103,25 +141,6 @@ void BMP280_ReadTemperatureAndPressure( BMP280 * const me, uint16_t altitude){
 
 	adc_P = me->buffer[0] << 12 |  me->buffer[1] << 4 | me->buffer[2] >> 4;
 	adc_T = me->buffer[3] << 12 |  me->buffer[4] << 4 | me->buffer[5] >> 4;
-
-////	//tutaj
-//	T1 = 27504;
-//	me->calibT[1] = 26435;
-//	me->calibT[2] = -1000;
-//
-//	P1 = 36477;
-//	me->calibP[1] = -10685;
-//	me->calibP[2] = 3024;
-//	me->calibP[3] = 2855;
-//	me->calibP[4] = 140;
-//	me->calibP[5] = -7;
-//	me->calibP[6] = 15500;
-//	me->calibP[7] = -14600;
-//	me->calibP[8] = 6000;
-//
-//	adc_T = 519888;
-//	adc_P = 415148;
-
 
 
 	var1 = (((double)adc_T)/16384.0 - ((double)T1)/1024.0) * (me->calibT[1]);
@@ -140,7 +159,7 @@ void BMP280_ReadTemperatureAndPressure( BMP280 * const me, uint16_t altitude){
 	var1 = (1.0 + var1 / 32768.0)*((double)(P1));
 	if (var1 == 0.0)
 	{
-		return 0; // avoid exception caused by division by zero
+		Error_Handler();
 	}
 	p = 1048576.0 - (double)adc_P;
 	p = (p - (var2 / 4096.0)) * 6250.0 / var1;
@@ -151,16 +170,39 @@ void BMP280_ReadTemperatureAndPressure( BMP280 * const me, uint16_t altitude){
 	p = p/100;
 	p = p*pow((1+0.0065*altitude/(T+273.15)),((9.8*0.029)/(8.314*0.0065)));
 	me ->rawPressure = p;
+
+
+
 }
 
+
+/*
+ * @brief function used to explicitly read one or more registers from sensor, data will be stored in BMP280 buffer
+ *
+ * @param pointer to BMP280 object
+ * @param starting address
+ * @param bytes to be read
+ *
+ * @retval nothing
+ */
 void BMP280_ReadRegisters(BMP280* const me, uint8_t address, uint8_t bytes) {
-	uint8_t ret[2];
-	ret[0] = HAL_I2C_Master_Transmit(me->i2c_handler, me->slaveAddress | 0, &address, 1, HAL_MAX_DELAY); //not sure
-	ret[1] = HAL_I2C_Master_Receive(me->i2c_handler, me->slaveAddress | 1, me->buffer, bytes, HAL_MAX_DELAY); //bytes cannot be greater than 24;
 
-	ret[0] = 0;
+	HAL_I2C_Master_Transmit(me->i2c_handler, me->slaveAddress | 0, &address, 1, HAL_MAX_DELAY); //not sure
+	HAL_I2C_Master_Receive(me->i2c_handler, me->slaveAddress | 1, me->buffer, bytes, HAL_MAX_DELAY); //bytes cannot be greater than 24;
+
+
 }
 
+/*
+ * @brief function used to write data into BMP280 registers
+ *
+ * @param pointer to BMP280 object
+ * @param pointer to a table filled with addresses of registers
+ * @param pointer to a table filled with data corresponding to addresses
+ * @param overall amount of bytes to be written
+ *
+ * @retval nothing
+ */
 void BMP280_WriteRegisters(BMP280 * const me, uint8_t* addresses, uint8_t*  data, uint8_t bytes) {
 	//2 bytes of data => 4 bytes overall (2data+2add)
 
@@ -176,32 +218,89 @@ void BMP280_WriteRegisters(BMP280 * const me, uint8_t* addresses, uint8_t*  data
 	HAL_I2C_Master_Transmit(me->i2c_handler, me->slaveAddress, dataToWrite, bytes*2, HAL_MAX_DELAY);
 }
 
+/*
+ * @brief function used to set value of Config Register
+ *
+ * @param pointer to BMP280 object
+ * @param value of Config Register to be set
+ *
+ * @retval nothing
+ */
 void BMP280_setConfigReg(BMP280 * const me, uint8_t reg) {
 	uint8_t add = 0xF5;
 	if((reg & 1) == 1) Error_Handler(); // otherwise SPI would turn on
 	BMP280_WriteRegisters(me, &add, &reg, 1);
 	me->configReg = reg;
 }
+
+/*
+ * @brief function used to set value of Control Meas
+ *
+ * @param pointer to BMP280 object
+ * @param value of Ctrl Meas Register to be set
+ *
+ * @retval nothing
+ */
 void BMP280_setCtrlMeasReg(BMP280 * const me, uint8_t reg){
 	uint8_t add = 0xF4; //CHECK THIS ONE
 	BMP280_WriteRegisters(me, &add, &reg, 1);
 	me->ctrlMeasReg = reg;
 }
-float BMP280_getTemperature(BMP280 * const me){
-	return 1;
+
+/*
+ * @brief function to get temperature read before from sensor
+ *
+ * @param pointer to BMP280 object
+ *
+ * @retval double, temperature value in Celsius
+ */
+double BMP280_getTemperature(BMP280 * const me){
+	return me->rawTemperature;
 }
-float BMP280_getPressure(BMP280 * const me) {
-	return 1;
+
+/*
+ * @brief function to get pressure read before from sensor
+ *
+ * @param pointer to BMP280 object
+ *
+ * @retval double, pressure value in hPa corresponding to Pressure at mean sea level
+ */
+double BMP280_getPressure(BMP280 * const me) {
+	return me->rawPressure;
 }
+
+/*
+ * @brief function to get sensor ID
+ *
+ * @param pointer to BMP280 object
+ *
+ * @retval uint8_t, should be equal to 0x58
+ */
 uint8_t BMP280_getSensorID(BMP280 * const me){
 	return me->id;
 }
+
+/*
+ * @brief function to get current value of Config Register
+ *
+ * @param pointer to BMP280 object
+ *
+ * @retval uint8_t, value of config register
+ */
 uint8_t BMP280_getConfigReg(BMP280 * const me) {
 	BMP280_ReadRegisters(me, 0xF5, 1);
 	me->configReg = me->buffer[0];
 
 	return me->configReg;
 }
+
+/*
+ * @brief function to get current value of Control Meas Register
+ *
+ * @param pointer to BMP280 object
+ *
+ * @retval uint8_t, value of control meas register
+ */
 uint8_t BMP280_getCtrlMeasReg(BMP280 * const me){
 	BMP280_ReadRegisters(me, 0xF4, 1);
 	me->ctrlMeasReg = me->buffer[0];
@@ -209,6 +308,13 @@ uint8_t BMP280_getCtrlMeasReg(BMP280 * const me){
 	return me->ctrlMeasReg;
 }
 
+/*
+ * @brief function to reset sensor
+ *
+ * @param pointer to BMP280 object
+ *
+ * @retval nothing
+ */
 void BMP280_ResetSensor(BMP280 * const me){
 	uint8_t add = 0xE0;
 	uint8_t reg = 0xB6;

@@ -58,21 +58,18 @@ BMP280* BMP280_Create(I2C_HandleTypeDef * i2c_handler, uint8_t SDO_state);
 void BMP280_Destroy(BMP280* const me);
 void BMP280_Init(BMP280* const me,I2C_HandleTypeDef* i2c_handler, uint8_t SDO_state);
 
-void BMP280_SensorInitialize(BMP280 * const me, uint8_t mode, uint16_t standbyTime, uint16_t osrs_t, uint16_t osrs_p);
+void BMP280_SensorInitialize(BMP280 * const me, uint8_t mode, uint8_t standbyTime, uint8_t osrs_t, uint8_t osrs_p);
 void BMP280_ReadTemperature(BMP280 * const me);
 void BMP280_ReadTemperatureAndPressure(BMP280 * const me, uint16_t altitude);
-void BMP280_ReadRegisters(BMP280 * const me, uint8_t address, uint8_t bytes);
 
-/*
- * Function to write multiple bytes to multiple registers
- */
+void BMP280_ReadRegisters(BMP280 * const me, uint8_t address, uint8_t bytes);
 void BMP280_WriteRegisters(BMP280 * const me, uint8_t* addresses, uint8_t*  data, uint8_t bytes);
 
 void BMP280_setConfigReg(BMP280 * const me, uint8_t reg);
 void BMP280_setCtrlMeasReg(BMP280 * const me, uint8_t reg);
 
-float BMP280_getTemperature(BMP280 * const me);
-float BMP280_getPressure(BMP280 * const me);
+double BMP280_getTemperature(BMP280 * const me);
+double BMP280_getPressure(BMP280 * const me);
 uint8_t BMP280_getSensorID(BMP280 * const me);
 uint8_t BMP280_getConfigReg(BMP280 * const me);
 uint8_t BMP280_getCtrlMeasReg(BMP280 * const me);
