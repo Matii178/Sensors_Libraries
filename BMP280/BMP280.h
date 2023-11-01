@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <main.h>
+#include <math.h>
 
 #define SDO_STATE_GND 0
 #define SDO_STATE_VDD 1
@@ -16,7 +17,7 @@
 
 //standby times
 #define STB_0_5 	0b000
-#define STB_0_62	0b001
+#define STB_62_5	0b001
 #define STB_125		0b010
 #define STB_250		0b011
 #define STB_500		0b100
@@ -38,8 +39,8 @@ typedef struct BMP280 BMP280;
 
 struct BMP280{
 	//20 bytes for temperature and pressure ?
-	uint32_t rawTemperature;
-	uint32_t rawPressure;
+	double rawTemperature;
+	double rawPressure;
 	uint8_t buffer[24];
 
 	I2C_HandleTypeDef* i2c_handler;
@@ -48,8 +49,8 @@ struct BMP280{
 	uint8_t ctrlMeasReg;
 	uint8_t id;
 
-	uint16_t calibT[3];
-	uint16_t calibP[9];
+	int16_t calibT[3];
+	int16_t calibP[9];
 
 };
 
@@ -59,8 +60,7 @@ void BMP280_Init(BMP280* const me,I2C_HandleTypeDef* i2c_handler, uint8_t SDO_st
 
 void BMP280_SensorInitialize(BMP280 * const me, uint8_t mode, uint16_t standbyTime, uint16_t osrs_t, uint16_t osrs_p);
 void BMP280_ReadTemperature(BMP280 * const me);
-void BMP280_ReadPressure(BMP280 * const me);
-void BMP280_ReadTemperatureAndPressure(BMP280 * const me);
+void BMP280_ReadTemperatureAndPressure(BMP280 * const me, uint16_t altitude);
 void BMP280_ReadRegisters(BMP280 * const me, uint8_t address, uint8_t bytes);
 
 /*
