@@ -21,8 +21,7 @@ int main(void)
 	  temperature = tempSensor->temperature;
 	  AM2320_readHumidity(tempSensor);
 	  humidity = tempSensor ->humidity;
-	  model = AM2320_getModel(tempSensor);
-	  version = AM2320_getVersion(tempSensor);
+	  
     
   }
   

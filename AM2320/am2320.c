@@ -1,5 +1,14 @@
 #include "am2320.h"
 
+/*
+* @brief function used to read registers inside sensor
+*
+* @param pointer to AM2320 object
+* @param starting address
+* @param amount of bytes to be read
+*
+* @retval uint8_t, 0 if eveything is fine, -1 if there was an error
+*/
 uint8_t AM2320_read(AM2320* const me, uint8_t startAdress, uint8_t bytes){
 	uint8_t funCodes[] = {0x03,startAdress,bytes};
 
@@ -20,7 +29,13 @@ uint8_t AM2320_read(AM2320* const me, uint8_t startAdress, uint8_t bytes){
 	return 0;
 }
 
-
+/*
+* @brief function used to read Temperature and save it to AM2320->temperature
+*
+* @param pointer to AM2320 object
+*
+* @retval nothing
+*/
 void AM2320_readTemperature(AM2320* const me) {
 		uint16_t result;
 		float temperature;
@@ -34,6 +49,13 @@ void AM2320_readTemperature(AM2320* const me) {
 
 }
 
+/*
+* @brief function used to read humidity and save it to AM2320->humidity 
+*
+* @param pointer to AM2320 object
+*
+* @retval nothing
+*/
 void AM2320_readHumidity(AM2320* const me) {
 	uint16_t result;
 	float humidity;
@@ -47,6 +69,13 @@ void AM2320_readHumidity(AM2320* const me) {
 
 }
 
+/*
+* @brief function used to read both temperature and humidity and save them to AM2320->temperature and humidity.. 
+*
+* @param pointer to AM2320 object
+*
+* @retval nothing
+*/
 void AM2320_readTempAndHum(AM2320* const me) {
 	uint16_t result;
 	float humidity;
@@ -64,30 +93,66 @@ void AM2320_readTempAndHum(AM2320* const me) {
 
 }
 
-
+/*
+* @brief function used to get temperature value stored int AM2320->temperature
+*
+* @param pointer to AM2320 object
+*
+* @retval float, temperature value
+*/
 float AM2320_getTemperature(AM2320* const me){
 	return me->temperature;
 }
+
+/*
+* @brief function used to get humidity value stored int AM2320->humidity
+*
+* @param pointer to AM2320 object
+*
+* @retval float, humidity value
+*/
 float AM2320_getHumidity(AM2320* const me){
 	return me->humidity;
 
-
 }
+
+/*
+* @brief function used to get Model number, although someone had to write it first there, otherwise it'll be 0
+*
+* @param pointer to AM2320 object
+*
+* @retval uint16_t
+*/
 uint16_t AM2320_getModel(AM2320* const me){
 	return me->model;
 }
+
+/*
+* @brief function used to get version number, although someone had to write it first there, otherwise it'll be 0
+*
+* @param pointer to AM2320 object
+*
+* @retval uint8_t
+*/
 uint8_t AM2320_getVersion(AM2320* const me){
 	return me->versionNum;
 
 }
 
 
+/*
+* @brief function used to initialize values during the process of creation the AM2320 object 
+*
+* @param pointer to AM2320 object
+* @param I2C handler
+*
+* @retval nothing
+*/
 void AM2320_Init(AM2320* const me,I2C_HandleTypeDef *hi2c){
 	me->I2Cinstance = hi2c;
 	me->humidity = 0;
 	me->temperature = 0;
 	memset(me->data,0,8);
-//
 	AM2320_read(me, 0x08, 0x02);
 	me->model = (me->data[2] << 8) | (me->data[3]);
 	HAL_Delay(100);
@@ -95,6 +160,13 @@ void AM2320_Init(AM2320* const me,I2C_HandleTypeDef *hi2c){
 	me->versionNum = me->data[2];
 }
 
+/*
+* @brief function used to Create new AM2320 object
+*
+* @param I2C handler
+*
+* @retval AM2320* pointer, pointer to an AM2320 object
+*/
 AM2320 * AM2320_Create(I2C_HandleTypeDef* hi2c){
 	AM2320* me = malloc(sizeof(AM2320));
 
@@ -104,6 +176,13 @@ AM2320 * AM2320_Create(I2C_HandleTypeDef* hi2c){
 	return me;
 }
 
+/*
+* @brief function used to Destroy an AM2320 object
+*
+* @param pointer to AM2320 object
+*
+* @retval nothing
+*/
 void AM2320_Destroy(AM2320* const me){
 	free(me);
 }
