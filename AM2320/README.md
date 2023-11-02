@@ -11,11 +11,11 @@ Equipment used: STM32f103RB dev board, 2x 4.7k Ohm resistors, AM2320 sensor.<br>
 3.3V -> Vdd  
 GND -> GND  
 (It depends on which I2C you're using) PB9 -> SDA  
-(It depends on which I2C you're using) PB8 -> SCL
+(It depends on which I2C you're using) PB8 -> SCL  
 SDA and SCL lines are pulled to Vdd via 4.7kΩ resistors
 
 __Datasheet__:  
-Here you can find all the information about registers, time settings etc. Unfortunatelly it was written using very poor english and sometimes it is really hard to understand.  
+Here you can find all the information about registers etc. Unfortunatelly it was written using very poor english and sometimes it is really hard to understand.  
 https://cdn-shop.adafruit.com/product-files/3721/AM2320.pdf
 
 ## Valuable information from the datasheet:  
@@ -40,15 +40,15 @@ https://cdn-shop.adafruit.com/product-files/3721/AM2320.pdf
 This file contains declaration of every AM2320 function and definition of slave address
 
 ## AM2320.c
-this file contains body of every function that is commented in a following name to make it easier to understand:
+this file contains body of every function that is commented in a following way to make it easier to understand:
 * @brief - short description of function's purpose
 * @param - described parameters, starting from the leftmost
 * @retval - returning value
 
 ## example.c
-this file contains example of creation the AM2320 object and how it is supposed to be used.
+this file contains example of creation the AM2320 object and how data from it is read and extracted.
 
-#### Additional info:
+### Additional info:
 Function AM2320_read(..) inserts HAL_DELAY(100), due to errors connected to sensor being read too often. I tried more elegant way using HAL_I2C_isDeviceReady(..) but it could not resolve the problem. Implementation of these HAL_DELAYs' ensures that user will not read sensor too often making it crash.
 
 
