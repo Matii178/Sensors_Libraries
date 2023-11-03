@@ -62,8 +62,8 @@ void BMP280_SensorInitialize(BMP280 * const me, uint8_t mode, uint8_t standbyTim
 void BMP280_ReadTemperature(BMP280 * const me);
 void BMP280_ReadTemperatureAndPressure(BMP280 * const me, uint16_t altitude);
 
-void BMP280_ReadRegisters(BMP280 * const me, uint8_t address, uint8_t bytes);
-void BMP280_WriteRegisters(BMP280 * const me, uint8_t* addresses, uint8_t*  data, uint8_t bytes);
+uint8_t BMP280_ReadRegisters(BMP280 * const me, uint8_t address, uint8_t bytes);
+uint8_t BMP280_WriteRegisters(BMP280 * const me, uint8_t* addresses, uint8_t*  data, uint8_t bytes);
 
 void BMP280_setConfigReg(BMP280 * const me, uint8_t reg);
 void BMP280_setCtrlMeasReg(BMP280 * const me, uint8_t reg);

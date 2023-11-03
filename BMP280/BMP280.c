@@ -51,13 +51,17 @@ void BMP280_Init(BMP280* const me,I2C_HandleTypeDef* i2c_handler, uint8_t SDO_st
 	me->rawPressure = 0;
 	me->rawTemperature = 0;
 
-	BMP280_ReadRegisters(me, 0xD0, 1);
+	if(BMP280_ReadRegisters(me, 0xD0, 1)){
+		Error_Handler();
+	}
 	me->id = me->buffer[0];
 
 	me->configReg = BMP280_getConfigReg(me);
 	me->ctrlMeasReg = BMP280_getCtrlMeasReg(me);
 
-	BMP280_ReadRegisters(me, 0x88, 24);
+	if(BMP280_ReadRegisters(me, 0x88, 24)){
+		Error_Handler();
+	}
 
 	for(int i = 0; i < 3; i ++) {
 		me->calibT[i] = me->buffer[2*i + 1] << 8 | me->buffer[2*i];
@@ -104,7 +108,9 @@ void BMP280_ReadTemperature(BMP280 * const me) {
 	int32_t adc_T = 0;
 	double var1, var2, T;
 
-	BMP280_ReadRegisters(me, 0xFA, 3);
+	if(BMP280_ReadRegisters(me, 0xFA, 3)){
+		Error_Handler();
+	}
 
 	adc_T = me->buffer[0] << 12 |  me->buffer[1] << 4 | me->buffer[2] >> 4;
 
@@ -137,7 +143,9 @@ void BMP280_ReadTemperatureAndPressure( BMP280 * const me, uint16_t altitude){
 	uint16_t P1 = (uint16_t) me->calibP[0];
 
 
-	BMP280_ReadRegisters(me, 0xF7, 6);
+	if(BMP280_ReadRegisters(me, 0xF7, 6)) {
+		Error_Handler();
+	}
 
 	adc_P = me->buffer[0] << 12 |  me->buffer[1] << 4 | me->buffer[2] >> 4;
 	adc_T = me->buffer[3] << 12 |  me->buffer[4] << 4 | me->buffer[5] >> 4;
@@ -183,14 +191,18 @@ void BMP280_ReadTemperatureAndPressure( BMP280 * const me, uint16_t altitude){
  * @param starting address
  * @param bytes to be read
  *
- * @retval nothing
+ * @retval uint8_t, 0 if everything is fine, -1 if something went wrong
  */
-void BMP280_ReadRegisters(BMP280* const me, uint8_t address, uint8_t bytes) {
+uint8_t BMP280_ReadRegisters(BMP280* const me, uint8_t address, uint8_t bytes) {
 
-	HAL_I2C_Master_Transmit(me->i2c_handler, me->slaveAddress | 0, &address, 1, HAL_MAX_DELAY); //not sure
-	HAL_I2C_Master_Receive(me->i2c_handler, me->slaveAddress | 1, me->buffer, bytes, HAL_MAX_DELAY); //bytes cannot be greater than 24;
+	if(HAL_I2C_Master_Transmit(me->i2c_handler, me->slaveAddress | 0, &address, 1, HAL_MAX_DELAY) != HAL_OK) {
+		return -1;
+	}
+	if(HAL_I2C_Master_Receive(me->i2c_handler, me->slaveAddress | 1, me->buffer, bytes, HAL_MAX_DELAY) != HAL_OK){
+		return -1;
+	}
 
-
+	return 0;
 }
 
 /*
@@ -201,9 +213,9 @@ void BMP280_ReadRegisters(BMP280* const me, uint8_t address, uint8_t bytes) {
  * @param pointer to a table filled with data corresponding to addresses
  * @param overall amount of bytes to be written
  *
- * @retval nothing
+ * @retval uint8_t, 0 if everything is fine, -1 if something went wrong
  */
-void BMP280_WriteRegisters(BMP280 * const me, uint8_t* addresses, uint8_t*  data, uint8_t bytes) {
+uint8_t BMP280_WriteRegisters(BMP280 * const me, uint8_t* addresses, uint8_t*  data, uint8_t bytes) {
 	//2 bytes of data => 4 bytes overall (2data+2add)
 
 	uint8_t dataToWrite[bytes*2]; // add + data
@@ -215,7 +227,11 @@ void BMP280_WriteRegisters(BMP280 * const me, uint8_t* addresses, uint8_t*  data
 		counter++;
 	}
 	//creating a table that contains addresses interspersed with data [add,data,add2,data2...]
-	HAL_I2C_Master_Transmit(me->i2c_handler, me->slaveAddress, dataToWrite, bytes*2, HAL_MAX_DELAY);
+	if(HAL_I2C_Master_Transmit(me->i2c_handler, me->slaveAddress, dataToWrite, bytes*2, HAL_MAX_DELAY) != HAL_OK){
+		return -1;
+	}
+
+	return 0;
 }
 
 /*
@@ -229,7 +245,9 @@ void BMP280_WriteRegisters(BMP280 * const me, uint8_t* addresses, uint8_t*  data
 void BMP280_setConfigReg(BMP280 * const me, uint8_t reg) {
 	uint8_t add = 0xF5;
 	if((reg & 1) == 1) Error_Handler(); // otherwise SPI would turn on
-	BMP280_WriteRegisters(me, &add, &reg, 1);
+	if(BMP280_WriteRegisters(me, &add, &reg, 1)) {
+		Error_Handler();
+	}
 	me->configReg = reg;
 }
 
@@ -243,7 +261,9 @@ void BMP280_setConfigReg(BMP280 * const me, uint8_t reg) {
  */
 void BMP280_setCtrlMeasReg(BMP280 * const me, uint8_t reg){
 	uint8_t add = 0xF4; //CHECK THIS ONE
-	BMP280_WriteRegisters(me, &add, &reg, 1);
+	if(BMP280_WriteRegisters(me, &add, &reg, 1)) {
+		Error_Handler();
+	}
 	me->ctrlMeasReg = reg;
 }
 
@@ -288,7 +308,9 @@ uint8_t BMP280_getSensorID(BMP280 * const me){
  * @retval uint8_t, value of config register
  */
 uint8_t BMP280_getConfigReg(BMP280 * const me) {
-	BMP280_ReadRegisters(me, 0xF5, 1);
+	if(BMP280_ReadRegisters(me, 0xF5, 1)) {
+		Error_Handler();
+	}
 	me->configReg = me->buffer[0];
 
 	return me->configReg;
@@ -302,7 +324,9 @@ uint8_t BMP280_getConfigReg(BMP280 * const me) {
  * @retval uint8_t, value of control meas register
  */
 uint8_t BMP280_getCtrlMeasReg(BMP280 * const me){
-	BMP280_ReadRegisters(me, 0xF4, 1);
+	if(BMP280_ReadRegisters(me, 0xF4, 1)) {
+		Error_Handler();
+	}
 	me->ctrlMeasReg = me->buffer[0];
 
 	return me->ctrlMeasReg;
@@ -318,7 +342,9 @@ uint8_t BMP280_getCtrlMeasReg(BMP280 * const me){
 void BMP280_ResetSensor(BMP280 * const me){
 	uint8_t add = 0xE0;
 	uint8_t reg = 0xB6;
-	BMP280_WriteRegisters(me, &add, &reg, 1);
+	if(BMP280_WriteRegisters(me, &add, &reg, 1)) {
+		Error_Handler();
+	}
 }
 
 
