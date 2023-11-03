@@ -1,6 +1,6 @@
 # BMP280 STM32 Library
 
-### Welcome to library created by me that covers BMP280 Bosch air pressure and temperature sensor. I used very similar board (HW-611) that had additional SDO and CSB pins, but they didn't need to be connected (SDO was connected to GND by manufacturer) thus on schematic I used similar sensor that contains only pins used by me.
+### Welcome to the library created by me that covers BMP280 Bosch air pressure and temperature sensor. I used very similar board (HW-611) that had additional SDO and CSB pins, but they didn't need to be connected (SDO was connected to GND by manufacturer) thus on schematic I used similar sensor that contains only occupied pins.
 <img src="https://github.com/Matii178/Sensors_Libraries/assets/62108776/acaa928f-16a5-4433-b36f-16053660e719" width="200" height="200">
 <img src = "https://github.com/Matii178/Sensors_Libraries/assets/62108776/75bf8897-eeb5-4546-9ae4-63e7a53e6672" width = "200" height = "200">
 
